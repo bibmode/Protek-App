@@ -16,6 +16,7 @@ class NewVehicle with ChangeNotifier, DiagnosticableTreeMixin {
   File? _affidavitImage;
   File? _memorandumOfAgreementImage;
   File? _acknowledgementImage;
+  File? _signatureImage;
 
   int get pageIndex => _pageIndex;
   String? get space => _space;
@@ -28,6 +29,7 @@ class NewVehicle with ChangeNotifier, DiagnosticableTreeMixin {
   File? get affidavitImage => _affidavitImage;
   File? get memorandumOfAgreementImage => _memorandumOfAgreementImage;
   File? get acknowledgementImage => _acknowledgementImage;
+  File? get signatureImage => _signatureImage;
 
   void restoreNew() {
     _pageIndex = 0;
@@ -54,6 +56,7 @@ class NewVehicle with ChangeNotifier, DiagnosticableTreeMixin {
     if (imageType == "memorandumOfAgreement")
       _memorandumOfAgreementImage = image;
     if (imageType == "acknowledgement") _acknowledgementImage = image;
+    if (imageType == "signature") _signatureImage = image;
 
     print('image is changed: $imageType');
 

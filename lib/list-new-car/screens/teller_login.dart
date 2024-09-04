@@ -107,12 +107,14 @@ class _TellerLoginState extends State<TellerLogin> {
         String? interiorImageUrl =
             await uploadVehicleImage(context.read<NewVehicle>().interiorImage);
         // legal
-        String? affidavitImageUrl = await uploadLegalFileImage(
-            context.read<NewVehicle>().affidavitImage);
-        String? memorandumImageUrl = await uploadLegalFileImage(
-            context.read<NewVehicle>().memorandumOfAgreementImage);
-        String? acknowledgementImageUrl = await uploadLegalFileImage(
-            context.read<NewVehicle>().acknowledgementImage);
+        // String? affidavitImageUrl = await uploadLegalFileImage(
+        //     context.read<NewVehicle>().affidavitImage);
+        // String? memorandumImageUrl = await uploadLegalFileImage(
+        //     context.read<NewVehicle>().memorandumOfAgreementImage);
+        // String? acknowledgementImageUrl = await uploadLegalFileImage(
+        //     context.read<NewVehicle>().acknowledgementImage);
+        String? signatureImageUrl = await uploadLegalFileImage(
+            context.read<NewVehicle>().signatureImage);
 
         print('space code: ${context.read<NewVehicle>().space}');
 
@@ -143,9 +145,7 @@ class _TellerLoginState extends State<TellerLogin> {
           'pic_left': leftImageUrl,
           'pic_right': rightImageUrl,
           'pic_interior': interiorImageUrl,
-          'legal_affidavit': affidavitImageUrl,
-          'legal_memorandum': memorandumImageUrl,
-          'legal_acknowledgement': acknowledgementImageUrl,
+          'signature': signatureImageUrl,
         });
 
         final branchData = await supabase

@@ -8,7 +8,10 @@ import 'package:protek_tracker/providers/make_payment.dart';
 import 'package:protek_tracker/providers/vehicle_tracked.dart';
 import 'package:protek_tracker/tracker/screens/dashboard/widgets/detail_row.dart';
 import 'package:protek_tracker/tracker/screens/dashboard/widgets/image_carousel.dart';
+import 'package:protek_tracker/tracker/screens/dashboard/widgets/legal_dialogs/acknowledgement_dialog.dart';
+import 'package:protek_tracker/tracker/screens/dashboard/widgets/legal_dialogs/memorandum_dialog.dart';
 import 'package:protek_tracker/tracker/screens/dashboard/widgets/legal_paper_button.dart';
+import 'package:protek_tracker/tracker/screens/dashboard/widgets/legal_dialogs/affidavit_dialog.dart';
 import 'package:provider/provider.dart';
 
 // helper functions
@@ -28,6 +31,9 @@ class _DashboardState extends State<Dashboard> {
   String? _branchName = '';
   String? _tellerName = '';
   String? _parkingLot = '';
+
+  String affidavit =
+      'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.';
 
   void _changeVehicleTracked() async {
     // get the vehicle from the list
@@ -430,24 +436,173 @@ class _DashboardState extends State<Dashboard> {
                       fontSize: 16,
                     ),
                   ),
-                  ..._legalImages.map((legal) {
-                    // get index of image link
-                    int index = _legalImages.indexOf(legal);
+                  // affidavit
+                  currentVehicle.dateOfCheckOut != null
+                      ? const Padding(padding: EdgeInsets.all(10))
+                      : Container(),
+                  currentVehicle.dateOfCheckOut != null
+                      ? Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade400),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'Affidavit',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              const Padding(padding: EdgeInsets.all(3)),
+                              Text(
+                                affidavit,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const Padding(padding: EdgeInsets.all(5)),
+                              OutlinedButton(
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AffidavitDialog(
+                                            affidavit: affidavit);
+                                      });
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Read More',
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container(),
 
-                    // extract paper title
-                    String paperTitle = index == 0
-                        ? 'Affidavit'
-                        : index == 1
-                            ? 'Memorandum of Agreement'
-                            : 'Acknowledgement';
+                  // Memorandum of Agreement
+                  const Padding(padding: EdgeInsets.all(15)),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Memorandum of Agreement',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const Padding(padding: EdgeInsets.all(3)),
+                        Text(
+                          affidavit,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Padding(padding: EdgeInsets.all(5)),
+                        OutlinedButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return MemorandumDialog();
+                                });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Read More',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                    if (legal != null) {
-                      return LegalPaperButton(
-                          imageLink: legal, paperTitle: paperTitle);
-                    } else {
-                      return Container();
-                    }
-                  }),
+                  // Acknowlegement
+                  const Padding(padding: EdgeInsets.all(15)),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Acknowlegement',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const Padding(padding: EdgeInsets.all(3)),
+                        Text(
+                          affidavit,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Padding(padding: EdgeInsets.all(5)),
+                        OutlinedButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AcknowledgementDialog();
+                                });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Read More',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ..._legalImages.map((legal) {
+                  //   // get index of image link
+                  //   int index = _legalImages.indexOf(legal);
+
+                  //   // extract paper title
+                  //   String paperTitle = index == 0
+                  //       ? 'Affidavit'
+                  //       : index == 1
+                  //           ? 'Memorandum of Agreement'
+                  //           : 'Acknowledgement';
+
+                  //   if (legal != null) {
+                  //     return LegalPaperButton(
+                  //         imageLink: legal, paperTitle: paperTitle);
+                  //   } else {
+                  //     return Container();
+                  //   }
+                  // }),
                 ],
               ),
             ),

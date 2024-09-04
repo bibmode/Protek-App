@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,6 +10,7 @@ import 'package:protek_tracker/tracker/widgets/image_container.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_state_notifier/flutter_state_notifier.dart';
 import 'package:scribble/scribble.dart';
+import 'package:path_provider/path_provider.dart';
 
 class LegalPapers extends StatefulWidget {
   const LegalPapers(
@@ -23,6 +26,7 @@ class LegalPapers extends StatefulWidget {
 
 class _LegalPapersState extends State<LegalPapers> {
   late ScribbleNotifier notifier;
+  bool loading = false;
 
   @override
   void initState() {
@@ -285,44 +289,55 @@ class _LegalPapersState extends State<LegalPapers> {
                 fontSize: 16,
               ),
             ),
+
             const Padding(padding: EdgeInsets.all(10)),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SizedBox(
-                height: 350,
-                child: Stack(
-                  children: [
-                    Scribble(
-                      notifier: notifier,
-                      drawPen: true,
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: _buildColorToolbar(context),
-                    )
-                  ],
+            ClipRect(
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SizedBox(
+                  height: 300,
+                  width: double.infinity,
+                  child: Stack(
+                    children: [
+                      Scribble(
+                        notifier: notifier,
+                        drawPen: true,
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: _buildColorToolbar(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ),
+            const Padding(padding: EdgeInsets.all(10)),
+            Text(
+              'NOTE: By putting your signature, you agree with the terms & conditions of the legal papers above.',
+              softWrap: true,
+              style: TextStyle(color: Colors.grey.shade700),
             ),
 
             const Padding(padding: EdgeInsets.all(18)),
             OutlinedButton(
-              onPressed: context.read<NewVehicle>().affidavitImage != null &&
-                      context.read<NewVehicle>().memorandumOfAgreementImage !=
-                          null &&
-                      context.read<NewVehicle>().acknowledgementImage != null
+              onPressed: !loading
                   ? () {
-                      context.read<NewVehicle>().updatePageIndex(3);
+                      _saveImage(context);
                     }
                   : null,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
-                child: const Center(child: Text('CONTINUE')),
+                child: Center(
+                  child: loading
+                      ? const CircularProgressIndicator()
+                      : const Text('CONTINUE'),
+                ),
               ),
             ),
           ],
@@ -332,14 +347,49 @@ class _LegalPapersState extends State<LegalPapers> {
   }
 
   Future<void> _saveImage(BuildContext context) async {
-    final image = await notifier.renderImage();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Your Image"),
-        content: Image.memory(image.buffer.asUint8List()),
-      ),
-    );
+    setState(() {
+      loading = true;
+    });
+    try {
+      print('sketch lines: ${notifier.currentSketch.lines.isEmpty}');
+      List<SketchLine> signatureLines = notifier.currentSketch.lines;
+
+      if (signatureLines.isNotEmpty) {
+        //  create file image
+        final data = await notifier.renderImage();
+        final buffer = data.buffer;
+        Directory tempDir = await getTemporaryDirectory();
+        String tempPath = tempDir.path;
+        var filePath =
+            '$tempPath/${context.read<NewVehicle>().newVehicle!.plateNo}.png';
+        File imageFile = await File(filePath).writeAsBytes(
+            buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+
+        // update from provider
+        context.read<NewVehicle>().updateImage(imageFile, "signature");
+
+        // go to next page
+        context.read<NewVehicle>().updatePageIndex(3);
+      } else {
+        final snackBar = SnackBar(
+          backgroundColor: Colors.red,
+          content: const Text('Must input owner\'s signature. Try again!'),
+          action: SnackBarAction(
+            label: 'Okay',
+            onPressed: () {},
+          ),
+        );
+
+        // Find the ScaffoldMessenger in the widget tree
+        // and use it to show a SnackBar.
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    } catch (e) {
+      print('file error: $e');
+    }
+    setState(() {
+      loading = false;
+    });
   }
 
   Widget _buildStrokeToolbar(BuildContext context) {

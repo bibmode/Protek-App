@@ -19,9 +19,9 @@ class _CoverPageState extends State<CoverPage> {
     super.initState();
     _controller = VideoPlayerController.asset('lib/images/protek_video.mp4');
 
-    _controller.addListener(() {
-      setState(() {});
-    });
+    // _controller.addListener(() {
+    //   setState(() {});
+    // });
     _controller.setLooping(true);
     _controller.initialize().then((_) => setState(() {}));
     _controller.play();
