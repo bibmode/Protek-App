@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:protek_tracker/shared_preferences_init.dart';
 import 'package:video_player/video_player.dart';
 
 class CoverPage extends StatefulWidget {
@@ -14,9 +15,28 @@ class CoverPage extends StatefulWidget {
 class _CoverPageState extends State<CoverPage> {
   late VideoPlayerController _controller;
 
+  // void loadInitRoute() {
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     // This code will be executed after the current frame has finished building
+  //     bool? isLocalAuth(String key) {
+  //       return SharedPrefs().prefs.getBool(key);
+  //     }
+
+  //     if (mounted) {
+  //       bool? isValidated = isLocalAuth('isAuth');
+  //       if (isValidated == true) {
+  //         context.go('/start');
+  //       } else {
+  //         context.go('/');
+  //       }
+  //     }
+  //   });
+  // }
+
   @override
   void initState() {
     super.initState();
+
     _controller = VideoPlayerController.asset('lib/images/protek_video.mp4');
 
     // _controller.addListener(() {
@@ -25,6 +45,17 @@ class _CoverPageState extends State<CoverPage> {
     _controller.setLooping(true);
     _controller.initialize().then((_) => setState(() {}));
     _controller.play();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //loadInitRoute();
+  }
+
+  // create a function that will get the preivious shared preferences (if not exited)
+  String? loadData(String key) {
+    return SharedPrefs().prefs.getString(key);
   }
 
   @override

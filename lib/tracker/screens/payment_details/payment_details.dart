@@ -160,7 +160,7 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                   ),
                   DetailRow(
                     title: 'Verified on',
-                    data: payment.verifiedDate != 'null'
+                    data: payment.verifiedDate != null
                         ? '${months[verifiedDate!.month - 1]} ${verifiedDate.day}, ${verifiedDate.year} ${verifiedDate.hour}:${minutesFormatter.format(verifiedDate.minute)}'
                         : '-',
                   ),

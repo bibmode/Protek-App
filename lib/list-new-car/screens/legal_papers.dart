@@ -394,7 +394,7 @@ class _LegalPapersState extends State<LegalPapers> {
 
   Widget _buildStrokeToolbar(BuildContext context) {
     return StateNotifierBuilder<ScribbleState>(
-      stateNotifier: notifier,
+      stateNotifier: notifier as StateNotifier<ScribbleState>,
       builder: (context, state, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -446,7 +446,7 @@ class _LegalPapersState extends State<LegalPapers> {
 
   Widget _buildColorToolbar(BuildContext context) {
     return StateNotifierBuilder<ScribbleState>(
-      stateNotifier: notifier,
+      stateNotifier: notifier as StateNotifier<ScribbleState>,
       builder: (context, state, _) => Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,

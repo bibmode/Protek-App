@@ -148,10 +148,12 @@ class _TellerLoginState extends State<TellerLogin> {
           'signature': signatureImageUrl,
         });
 
-        final branchData = await supabase
-            .from('spaces')
-            .update({'occupied': true}).match(
-                {'space_code': context.read<NewVehicle>().space});
+        // edited
+        final spaceCode = context.read<NewVehicle>().space;
+
+        final branchData =
+            await supabase.from('spaces').update({'occupied': true})
+              ..match({'space_code': spaceCode});
 
         print('vehicle submit $data');
 

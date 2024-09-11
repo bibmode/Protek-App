@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:protek_tracker/providers/vehicle_tracked.dart';
+import 'package:protek_tracker/shared_preferences_init.dart';
 import 'package:protek_tracker/tracker/screens/dashboard/dashboard.dart';
 import 'package:protek_tracker/tracker/screens/payments/payments.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
             });
           } else {
             context.read<VehicleTracked>().restoreNew();
+            SharedPrefs().prefs.remove('isAuth');
+            SharedPrefs().prefs.remove('plate_no');
             context.go('/start');
           }
         },

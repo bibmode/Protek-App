@@ -74,7 +74,7 @@ class PaymentItem extends StatelessWidget {
                           if (payment.validated! == false &&
                               payment.error == false)
                             Text(
-                              'Verification Pending',
+                              'Not Done',
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.yellow.shade800),
@@ -109,15 +109,29 @@ class PaymentItem extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.only(top: 10),
               child: OutlinedButton(
-                onPressed: () =>
-                    context.push('/tracker/payment-details', extra: payment),
+                onPressed: () {
+                  if (payment.validated == false && payment.error == false) {
+                    // Show Snackbar with a message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Payment is not yet done. Please complete it.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  } else {
+                    // Navigate to the payment details page
+                    context.push('/tracker/payment-details', extra: payment);
+                  }
+                },
                 style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 child: const Text('See Details'),
               ),
-            ),
+            )
           ],
         ),
       ),

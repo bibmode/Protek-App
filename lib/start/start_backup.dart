@@ -11,14 +11,14 @@ import 'package:protek_tracker/providers/vehicle_tracked.dart';
 import 'package:protek_tracker/shared_preferences_init.dart';
 import 'package:provider/provider.dart';
 
-class StartScreen extends StatefulWidget {
-  const StartScreen({Key? key}) : super(key: key);
+class StartScreen1 extends StatefulWidget {
+  const StartScreen1({Key? key}) : super(key: key);
 
   @override
   _StartScreenState createState() => _StartScreenState();
 }
 
-class _StartScreenState extends State<StartScreen> {
+class _StartScreenState extends State<StartScreen1> {
   final _listFormKey = GlobalKey<FormBuilderState>();
   final _trackFormKey = GlobalKey<FormBuilderState>();
 
@@ -44,6 +44,14 @@ class _StartScreenState extends State<StartScreen> {
 
     // update vehicle in provider
     context.read<VehicleTracked>().updateCurrentVehicle(currentVehicle);
+  }
+
+  void saveData(String key, String value) {
+    SharedPrefs().prefs.setString(key, value);
+  }
+
+  void saveDataBool(String key, bool value) {
+    SharedPrefs().prefs.setBool(key, value);
   }
 
   Future<void> _getAllFreeSpaces() async {
@@ -77,12 +85,62 @@ class _StartScreenState extends State<StartScreen> {
     SharedPrefs().prefs.setBool(key, value);
   }
 
+  // void loadInitRoute() {
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     if (!mounted) return;
+  //     bool? localAuth(String key) {
+  //       return SharedPrefs().prefs.getBool(key);
+  //     }
+
+  //     bool? isValidated = localAuth('isAuth');
+  //     String? plateNum = SharedPrefs().prefs.getString('plate_no');
+  //     String destination = (isValidated == true) ? '/tracker' : '/start';
+
+  //     // Ensure that _changeVehicleTracked is not causing issues during the build
+  //     if (isValidated == true) {
+  //       _changeVehicleTracked(plateNum);
+  //       context.go(destination);
+  //     } else {
+  //       context.go(destination);
+  //     }
+  //   });
+  // }
+
+  void loadInitRoute() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      bool? localAuth(String key) {
+        return SharedPrefs().prefs.getBool(key);
+      }
+
+      bool? isValidated = localAuth('isAuth');
+
+      String? plateNum = SharedPrefs().prefs.getString('plate_no');
+      String destination = (isValidated == true) ? '/tracker' : '/start';
+
+      // Ensure that _changeVehicleTracked is not causing issues during the build
+      if (isValidated == true) {
+        _changeVehicleTracked(plateNum);
+        context.go(destination);
+      } else {
+        context.go(destination);
+      }
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     _getAllFreeSpaces();
     _getAllVehicles();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadInitRoute();
   }
 
   @override
@@ -298,14 +356,16 @@ class _StartScreenState extends State<StartScreen> {
                                       (vehicle) => vehicle['plate_no'] == value)
                                   .toList()
                                   .isNotEmpty;
+                              print("VALUE ni plateNoIsFound $plateNoIsFound ");
 
                               if (!plateNoIsFound) {
                                 return 'Plate number not found';
                               }
                               setState(() {
-                                savePlateNumber('plate_no', value.toString());
-                                saveisAuth('isAuth', true);
+                                saveData('plate_no', value.toString());
+                                saveDataBool('isAuth', true);
                               });
+
                               return null;
                             }
                           ]),

@@ -89,6 +89,7 @@ class _ListNewCarState extends State<ListNewCar> {
           IconButton(
               onPressed: () {
                 context.read<NewVehicle>().restoreNew();
+                // cleare the shared preferenece stored in the variable  here.
                 context.go('/');
               },
               icon: const Icon(Icons.exit_to_app)),
