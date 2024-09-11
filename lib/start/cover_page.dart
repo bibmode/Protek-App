@@ -1,7 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:protek_tracker/main.dart';
 import 'package:protek_tracker/shared_preferences_init.dart';
 import 'package:video_player/video_player.dart';
 
@@ -14,52 +16,42 @@ class CoverPage extends StatefulWidget {
 
 class _CoverPageState extends State<CoverPage> {
   late VideoPlayerController _controller;
-
-  // void loadInitRoute() {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     // This code will be executed after the current frame has finished building
-  //     bool? isLocalAuth(String key) {
-  //       return SharedPrefs().prefs.getBool(key);
-  //     }
-
-  //     if (mounted) {
-  //       bool? isValidated = isLocalAuth('isAuth');
-  //       if (isValidated == true) {
-  //         context.go('/start');
-  //       } else {
-  //         context.go('/');
-  //       }
-  //     }
-  //   });
-  // }
+  bool _isconnected = false;
+  StreamSubscription<InternetStatus>? _internetSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = VideoPlayerController.asset('lib/images/protek_video.mp4');
+    // Initialize the internet connection checker
+    _checkInternetConnection();
 
-    // _controller.addListener(() {
-    //   setState(() {});
-    // });
-    _controller.setLooping(true);
-    _controller.initialize().then((_) => setState(() {}));
-    _controller.play();
+    // Initialize and set up the video controller
+    _controller = VideoPlayerController.asset('lib/images/protek_video.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.setLooping(true);
+        _controller.play();
+      });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    //loadInitRoute();
-  }
+  void _checkInternetConnection() async {
+    // Check initial connection status
+    _isconnected = await InternetConnection().hasInternetAccess;
+    setState(() {});
 
-  // create a function that will get the preivious shared preferences (if not exited)
-  String? loadData(String key) {
-    return SharedPrefs().prefs.getString(key);
+    // Start listening to connection changes
+    _internetSubscription =
+        InternetConnection().onStatusChange.listen((InternetStatus status) {
+      setState(() {
+        _isconnected = status == InternetStatus.connected;
+      });
+    });
   }
 
   @override
   void dispose() {
+    _internetSubscription?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -67,10 +59,10 @@ class _CoverPageState extends State<CoverPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.transparent,
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: <Widget>[
+          // Video background
           SizedBox.expand(
             child: FittedBox(
               fit: BoxFit.cover,
@@ -81,17 +73,16 @@ class _CoverPageState extends State<CoverPage> {
               ),
             ),
           ),
+          // Gradient overlay and content
           Container(
             height: 500,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                  colors: [
-                    Colors.white,
-                    Colors.transparent,
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  tileMode: TileMode.clamp),
+                colors: [Colors.white, Colors.transparent],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                tileMode: TileMode.clamp,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -118,7 +109,15 @@ class _CoverPageState extends State<CoverPage> {
                       backgroundColor: Colors.black87,
                     ),
                     onPressed: () {
-                      context.go('/start');
+                      if (_isconnected) {
+                        if (SharedPrefs().prefs.getBool('isAuth') == true) {
+                          context.go('/restart');
+                        } else {
+                          context.go('/start');
+                        }
+                      } else {
+                        context.go('/nointernet');
+                      }
                     },
                     child: const Text(
                       'CONTINUE',

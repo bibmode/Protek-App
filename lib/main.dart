@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:protek_tracker/list-new-car/list_new_car.dart';
 import 'package:protek_tracker/models/payment.dart';
+import 'package:protek_tracker/no_internet_connection.dart';
 import 'package:protek_tracker/providers/make_payment.dart';
 import 'package:protek_tracker/providers/new_vehicle_provider.dart';
 import 'package:protek_tracker/providers/vehicle_tracked.dart';
@@ -13,7 +17,6 @@ import 'package:protek_tracker/tracker/screens/payment_details/payment_details.d
 import 'package:protek_tracker/tracker/tracker.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'models/vehicle.dart';
 
@@ -48,6 +51,8 @@ class _MyAppState extends State<MyApp> {
   Future<String>? _initialRoute;
   late List<Map<String, dynamic>> _freeSpaces;
   late List<Map<String, dynamic>> _allVehicles;
+  bool _isconnected = false;
+  late StreamSubscription<InternetStatus> _internetSubscription;
 
 /* Theses function are from the start.dart that need to initialize so I put it here in main */
   Future<void> _getAllFreeSpaces() async {
@@ -91,12 +96,34 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    // this is for the internet connection status checking.
+    _checkInternetConnection();
+    @override
+    void dispose() {
+      _internetSubscription.cancel();
+      super.dispose();
+    }
+
     _initialRoute = _determineInitialRoute();
   }
 
+  void _checkInternetConnection() async {
+    // Check initial connection status
+    _isconnected = await InternetConnection().hasInternetAccess;
+    setState(() {});
+
+    // Start listening to connection changes
+    _internetSubscription =
+        InternetConnection().onStatusChange.listen((InternetStatus status) {
+      setState(() {
+        _isconnected = status == InternetStatus.connected;
+      });
+    });
+  }
+
   Future<String> _determineInitialRoute() async {
-    await _getAllFreeSpaces(); // Fetch free spaces
-    await _getAllVehicles(); // Fetch all vehicles
+    await _getAllFreeSpaces();
+    await _getAllVehicles();
     final initialRoute = await loadInitRoute();
     return initialRoute; // Return the route to FutureBuilder
   }
@@ -106,13 +133,16 @@ class _MyAppState extends State<MyApp> {
     bool? isValidated = SharedPrefs().prefs.getBool('isAuth');
     String? plateNum = SharedPrefs().prefs.getString('plate_no');
 
-    String destination = (isValidated == true) ? '/tracker' : '/';
+    String destination =
+        (isValidated == true && _isconnected == true) ? '/tracker' : '/';
 
     if (isValidated == true) {
       _changeVehicleTracked(plateNum);
     }
     return destination;
   }
+
+  // internet checker screen
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +206,18 @@ class _MyAppState extends State<MyApp> {
               path: '/list-new-car',
               builder: (BuildContext context, GoRouterState state) {
                 return const ListNewCar();
+              },
+            ),
+            GoRoute(
+              path: '/nointernet',
+              builder: (BuildContext context, GoRouterState state) {
+                return NoInternetPage();
+              },
+            ),
+            GoRoute(
+              path: '/restart',
+              builder: (BuildContext context, GoRouterState state) {
+                return MyApp();
               },
             ),
           ],

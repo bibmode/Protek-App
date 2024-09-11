@@ -103,6 +103,8 @@ class _DashboardState extends State<Dashboard> {
         .eq('vehicle', context.read<VehicleTracked>().currentVehicle.id!)
         .eq('validated', false);
 
+    if (!mounted) return; // Check if the widget is still mounted
+
     if (data.isNotEmpty) {
       context.read<MakePayment>().updatePendingPayment(true);
     } else {
