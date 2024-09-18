@@ -51,7 +51,9 @@ class _PaymentsState extends State<Payments> {
               padding: EdgeInsets.all(28.0),
               child: Align(
                   alignment: Alignment.topCenter,
-                  child: CircularProgressIndicator()),
+                  child: CircularProgressIndicator(
+                    color: Color.fromARGB(255, 215, 163, 17),
+                  )),
             );
           }
         });

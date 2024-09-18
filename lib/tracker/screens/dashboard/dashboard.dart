@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:protek_tracker/main.dart';
 import 'package:protek_tracker/models/payment.dart';
 import 'package:protek_tracker/models/vehicle.dart';
@@ -25,6 +26,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  bool _isMounted = false;
   bool loading = false;
   late List<String?> _vehicleImages;
   late List<String?> _legalImages;
@@ -37,16 +39,22 @@ class _DashboardState extends State<Dashboard> {
 
   void _changeVehicleTracked() async {
     // get the vehicle from the list
-    final vehicleMatch = await supabase
-        .from('vehicles')
-        .select()
-        .eq('id', context.read<VehicleTracked>().currentVehicle.id!);
+    try {
+      final vehicleMatch = await supabase
+          .from('vehicles')
+          .select()
+          .eq('id', context.read<VehicleTracked>().currentVehicle.id!);
 
-    // make new Vehicle instance
-    Vehicle currentVehicle = Vehicle.fromMap(vehicleMatch.first);
+      // make new Vehicle instance
+      Vehicle currentVehicle = Vehicle.fromMap(vehicleMatch.first);
 
-    // update vehicle in provider
-    context.read<VehicleTracked>().updateCurrentVehicle(currentVehicle);
+      // update vehicle in provider
+      if (mounted) {
+        context.read<VehicleTracked>().updateCurrentVehicle(currentVehicle);
+      }
+    } catch (e) {
+      print("Error in changeVehicleTracked(): $e");
+    }
   }
 
   String? getImageURL(String? imagePath) {
@@ -58,41 +66,64 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void getBranchName() async {
-    // get the vehicle from the list
-    final branch = await supabase
-        .from('branches')
-        .select('branch_name')
-        .eq('id', context.read<VehicleTracked>().currentVehicle.branchId!);
+    try {
+      // Get the vehicle from the list
+      final branch = await supabase
+          .from('branches')
+          .select('branch_name')
+          .eq('id', context.read<VehicleTracked>().currentVehicle.branchId!)
+          .single(); // Use .single() to fetch a single record
 
-    setState(() {
-      _branchName = branch[0]['branch_name'];
-    });
+      if (_isMounted) {
+        setState(() {
+          _branchName = branch['branch_name'];
+        });
+      }
+    } catch (error) {
+      // Handle error and update state or UI accordingly
+      if (_isMounted) {
+        setState(() {
+          _branchName = 'Error fetching branch name';
+        });
+        print('Error fetching branch name: $error');
+      }
+    }
   }
 
   void getParkingLot() {
-    String spaceCode = context.read<VehicleTracked>().currentVehicle.space!;
-    String phase =
-        spaceCode.substring(spaceCode.indexOf('p'), spaceCode.indexOf('p') + 2);
-    String lot =
-        spaceCode.substring(spaceCode.indexOf('p') + 2, spaceCode.length);
+    try {
+      String spaceCode = context.read<VehicleTracked>().currentVehicle.space!;
+      String phase = spaceCode.substring(
+          spaceCode.indexOf('p'), spaceCode.indexOf('p') + 2);
+      String lot =
+          spaceCode.substring(spaceCode.indexOf('p') + 2, spaceCode.length);
 
-    setState(() {
-      _parkingLot = '${phase.toUpperCase()} - ${lot.toUpperCase()}';
-    });
+      setState(() {
+        _parkingLot = '${phase.toUpperCase()} - ${lot.toUpperCase()}';
+      });
+    } catch (e) {
+      print("Error in executing getParkingLot():  $e");
+    }
   }
 
   void getTellerName() async {
     // get the vehicle from the list
-    final teller = await supabase
-        .from('tellers')
-        .select('name')
-        .eq('id', context.read<VehicleTracked>().currentVehicle.tellerId!);
+    try {
+      final teller = await supabase
+          .from('tellers')
+          .select('name')
+          .eq('id', context.read<VehicleTracked>().currentVehicle.tellerId!);
 
-    print('teller: $teller');
+      print('teller: $teller');
 
-    setState(() {
-      _tellerName = teller[0]['name'];
-    });
+      if (_isMounted) {
+        setState(() {
+          _tellerName = teller[0]['name'];
+        });
+      }
+    } catch (e) {
+      print("Error in getTellerName(): $e");
+    }
   }
 
   // get payments of user
@@ -180,6 +211,7 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
+    _isMounted = true;
     _vehicleImages = getVehicleImages();
     _legalImages = getLegalImages();
     checkForPendingPayments();
@@ -191,14 +223,30 @@ class _DashboardState extends State<Dashboard> {
   }
 
   @override
+  void dispose() {
+    _isMounted = false;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Vehicle currentVehicle = context.read<VehicleTracked>().currentVehicle;
 
+    int numberOfDays;
     // values
     // balance
     DateTime now = DateTime.now();
     DateTime checkInDate = DateTime.parse(currentVehicle.dateOfCheckIn!);
-    int numberOfDays = daysBetween(checkInDate, now);
+    DateTime? checkOut = currentVehicle.dateOfCheckOut != null
+        ? null
+        : DateTime.parse(currentVehicle.dateOfCheckOut!);
+    // TODO: add logic for vehicles that have already been checked-out
+
+    if (checkOut == null) {
+      numberOfDays = daysBetween(checkInDate, now);
+    } else {
+      numberOfDays = daysBetween(checkInDate, checkOut);
+    }
 
     double? paid = context.read<VehicleTracked>().currentVehicle.paid ?? 0;
     double? dailyRate = context.read<VehicleTracked>().currentVehicle.dailyRate;
@@ -206,11 +254,31 @@ class _DashboardState extends State<Dashboard> {
     double security = (rent * 0.06).round() * 1.0;
     double insurance = (rent * 0.08).round() * 1.0;
     double legal = (rent * 0.03).round() * 1.0;
-    double admin = (rent * 0.12).round() * 1.0;
+    double admin = (rent * 0.02).round() * 1.0;
     double vat = (rent * 0.12).round() * 1.0;
     double others = (rent * 0.1).round() * 1.0;
     double total = security + insurance + legal + admin + vat + rent + others;
     double unpaid = total - paid;
+
+    String formatDateTime(String? input) {
+      // Check if the input is null or empty
+      if (input == null || input.isEmpty) {
+        return '-';
+      }
+
+      try {
+        DateTime dateTime = DateTime.parse(input.split('.')[0]);
+        DateFormat dateFormat = DateFormat('MMM d, yyyy h:mm a');
+        return dateFormat.format(dateTime);
+      } catch (e) {
+        return '-';
+      }
+    }
+
+    String formatDigits(double number) {
+      final NumberFormat formatter = NumberFormat('₱ #,##0.00');
+      return formatter.format(number);
+    }
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -640,7 +708,8 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   DetailRow(
                     title: 'Check-in',
-                    data: currentVehicle.dateOfCheckIn ?? '-',
+                    data: formatDateTime(checkInDate.toString()),
+                    //data: currentVehicle.dateOfCheckIn ?? '-',
                   ),
                   DetailRow(
                     title: 'Daily Rate',
@@ -652,7 +721,8 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   DetailRow(
                     title: 'Check-out',
-                    data: currentVehicle.dateOfCheckOut ?? '-',
+                    data: formatDateTime(currentVehicle.dateOfCheckOut),
+                    //data: currentVehicle.dateOfCheckOut ?? '-',
                   ),
                   DetailRow(
                     title: 'Cashier',
@@ -685,31 +755,38 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   DetailRow(
                     title: 'Rental Fee',
-                    data: '₱ $rent',
+                    //data: '₱ $rent',
+                    data: formatDigits(rent),
                   ),
                   DetailRow(
                     title: 'Security Fees',
-                    data: '₱ $security',
+                    //data: '₱ $security',
+                    data: formatDigits(security),
                   ),
                   DetailRow(
                     title: 'Insurance',
-                    data: '₱ $insurance',
+                    //data: '₱ $insurance',
+                    data: formatDigits(insurance),
                   ),
                   DetailRow(
                     title: 'Legal Fees',
-                    data: '₱ $legal',
+                    //data: '₱ $legal',
+                    data: formatDigits(legal),
                   ),
                   DetailRow(
                     title: 'Administration Fees',
-                    data: '₱ $admin',
+                    //data: '₱ $admin',
+                    data: formatDigits(admin),
                   ),
                   DetailRow(
                     title: 'VAT (12%)',
-                    data: '₱ $vat',
+                    //data: '₱ $vat',
+                    data: formatDigits(vat),
                   ),
                   DetailRow(
                     title: 'Other Taxes',
-                    data: '₱ $others',
+                    //data: '₱ $others',
+                    data: formatDigits(others),
                   ),
                 ],
               ),
@@ -737,16 +814,18 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   DetailRow(
-                    title: 'Total Fees',
-                    data: '₱ $total',
-                  ),
+                      title: 'Total Fees',
+                      //data: '₱ $total',
+                      data: formatDigits(total)),
                   DetailRow(
                     title: 'Paid',
-                    data: '₱ $paid',
+                    //data: '₱ $paid',
+                    data: formatDigits(paid),
                   ),
                   DetailRow(
                     title: 'Unpaid',
-                    data: '₱ $unpaid',
+                    //data: '₱ $unpaid',
+                    data: formatDigits(unpaid),
                   ),
                 ],
               ),
@@ -775,7 +854,8 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       const Spacer(),
                       Text(
-                        '₱ $unpaid',
+                        //'₱ $unpaid',
+                        formatDigits(unpaid),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 17,
@@ -796,7 +876,9 @@ class _DashboardState extends State<Dashboard> {
                               child: SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(),
+                                child: CircularProgressIndicator(
+                                  color: Color.fromARGB(255, 215, 163, 17),
+                                ),
                               ),
                             )
                           : const Center(child: Text('MAKE A PAYMENT')),

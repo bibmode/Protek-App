@@ -52,6 +52,9 @@ dependencies:
   app_links: ^6.3.2
   shared_preferences: ^2.3.2
   internet_connection_checker_plus: ^2.4.0
+  dio: ^5.7.0
+  flutter_dotenv: ^5.1.0
+  flutter_inappwebview: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -89,9 +92,13 @@ flutter:
     - lib/images/protek-garage-2.png
     - lib/images/protek-garage-3.png
     - lib/images/gcash.png
+    - lib/images/maya.jpg
+    - lib/images/grab.jpg
     - lib/images/gcash-express-send.jpg
     - lib/images/gcash-send.jpg
     - lib/images/protek_video.mp4
+    - lib/images/Pay-online.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

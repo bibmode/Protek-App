@@ -25,6 +25,42 @@ class _TrackerScreenState extends State<TrackerScreen> {
       shape: const Border(bottom: BorderSide(color: Colors.black12, width: 4)),
     )
   ];
+  Future<void> showExitConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap a button to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title:
+              const Text('Confirm Exit', style: TextStyle(color: Colors.black)),
+          content: const Text('Are you sure you want to exit?',
+              style: TextStyle(color: Colors.black)),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child:
+                  const Text('Cancel', style: TextStyle(color: Colors.black)),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<VehicleTracked>().restoreNew();
+                SharedPrefs().prefs.remove('isAuth');
+                SharedPrefs().prefs.remove('plate_no');
+                context.go('/start');
+              },
+              child: const Text(
+                'Exit',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+          backgroundColor: const Color.fromARGB(255, 226, 183, 30),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +74,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
               currentPageIndex = index;
             });
           } else {
-            context.read<VehicleTracked>().restoreNew();
-            SharedPrefs().prefs.remove('isAuth');
-            SharedPrefs().prefs.remove('plate_no');
-            context.go('/start');
+            showExitConfirmationDialog(context);
           }
         },
         indicatorColor: Colors.yellow.shade600,

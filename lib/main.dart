@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:protek_tracker/list-new-car/list_new_car.dart';
@@ -22,11 +23,14 @@ import 'models/vehicle.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SharedPrefs().init(); // Initialize SharedPrefs
+
+  await dotenv.load(fileName: ".env");
+
+  await SharedPrefs().init();
+
   await Supabase.initialize(
-    url: 'https://scngrphomkhxwdssipjb.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbmdycGhvbWtoeHdkc3NpcGpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTA0MTgxMjMsImV4cCI6MjAyNTk5NDEyM30.mJ3gbqzVtVXdommYS5g39r7vWu3op2CLJKUOGYN4qUk',
+    url: dotenv.get('SUPABASE_URL'),
+    anonKey: dotenv.get('SUPABASE_ANON_KEY'),
   );
 
   runApp(MultiProvider(
@@ -152,7 +156,11 @@ class _MyAppState extends State<MyApp> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MaterialApp(
             home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: Color.fromARGB(255, 215, 163, 17),
+                ),
+              ),
             ),
           );
         } else if (snapshot.hasError) {

@@ -13,6 +13,7 @@ import 'package:protek_tracker/tracker/screens/make-payment/widgets/choose_metho
 import 'package:protek_tracker/tracker/screens/make-payment/widgets/make_payment_appbar.dart';
 import 'package:protek_tracker/tracker/widgets/appbar_step.dart';
 import 'package:provider/provider.dart';
+import '../../../models/vehicle.dart';
 
 class MakePaymentScreen extends StatefulWidget {
   const MakePaymentScreen({Key? key}) : super(key: key);
@@ -66,6 +67,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Vehicle currentVehicle = context.read<VehicleTracked>().currentVehicle;
     bool pendingPayment = context.watch<MakePayment>().pendingPayment;
     int currentStepIndex =
         pendingPayment ? 4 : context.watch<MakePayment>().stepIndex;
@@ -99,13 +101,13 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Make a Payment'),
+            const Text('Make a Payment'),
             Text(
-              'Jeep Wrangler',
-              style: TextStyle(
+              '${currentVehicle.make}',
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
               ),
@@ -168,7 +170,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                     _isVisible
                         ? AppBarStep(
                             number: '3',
-                            title: 'Choose\nMethod',
+                            title: 'Payment\nSummary',
                             done: currentStepIndex >= 2,
                           )
                         : Container(),

@@ -25,9 +25,35 @@ class _PaymentDetailsState extends State<PaymentDetails> {
     // format date submitted
     Payment payment = widget.payment;
 
+    String? method = payment.method;
+
     DateTime date = DateTime.parse(payment.date!);
     DateTime? verifiedDate =
         payment.validated! ? DateTime.parse(payment.verifiedDate!) : null;
+
+    String paymentMethodImage() {
+      if (method == 'gcash') {
+        return 'lib/images/gcash.png';
+      } else if (method == 'paymaya') {
+        return 'lib/images/maya.jpg';
+      } else if (method == 'grab_pay') {
+        return 'lib/images/grab.jpg';
+      } else {
+        return 'lib/images/Pay-online.png';
+      }
+    }
+
+    String paymentMethod() {
+      if (method == 'gcash') {
+        return 'GCash';
+      } else if (method == 'paymaya') {
+        return 'Pay Maya';
+      } else if (method == 'grab_pay') {
+        return 'Grab Pay';
+      } else {
+        return 'Other Payment Method';
+      }
+    }
 
     List<String> months = [
       'Jan',
@@ -71,6 +97,11 @@ class _PaymentDetailsState extends State<PaymentDetails> {
     double? paid = currentVehicle.paid;
     double? dailyRate = currentVehicle.dailyRate;
     double? balance = (dailyRate! * numberOfDays) - paid!;
+
+    String formatDigits(double number) {
+      final NumberFormat formatter = NumberFormat('₱ #,##0.00');
+      return formatter.format(number);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +157,7 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                       color: Colors.amber.shade600,
                       child: const Center(
                         child: Text(
-                          'VERIFICATION PENDING',
+                          'NOT DONE',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -158,16 +189,23 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                     data:
                         '${months[date.month - 1]} ${date.day}, ${date.year} ${date.hour}:${minutesFormatter.format(date.minute)}',
                   ),
+                  // DetailRow(
+                  //   title: 'Verified on',
+                  //   data: payment.verifiedDate != null
+                  //       ? '${months[verifiedDate!.month - 1]} ${verifiedDate.day}, ${verifiedDate.year} ${verifiedDate.hour}:${minutesFormatter.format(verifiedDate.minute)}'
+                  //       : '-',
+                  // ),
                   DetailRow(
                     title: 'Verified on',
-                    data: payment.verifiedDate != null
-                        ? '${months[verifiedDate!.month - 1]} ${verifiedDate.day}, ${verifiedDate.year} ${verifiedDate.hour}:${minutesFormatter.format(verifiedDate.minute)}'
+                    data: verifiedDate != null
+                        ? '${months[verifiedDate.month - 1]} ${verifiedDate.day}, ${verifiedDate.year} ${verifiedDate.hour}:${minutesFormatter.format(verifiedDate.minute)}'
                         : '-',
                   ),
+
                   DetailRow(
-                    title: 'Daily Fee',
-                    data: '₱ $dailyRate',
-                  ),
+                      title: 'Daily Fee',
+                      //data: '₱ $dailyRate',
+                      data: formatDigits(dailyRate)),
                 ],
               ),
             ),
@@ -194,31 +232,38 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                   ),
                   DetailRow(
                     title: 'Rental Fee',
-                    data: '₱ $rent',
+                    //data: '₱ $rent',
+                    data: formatDigits(rent),
                   ),
                   DetailRow(
                     title: 'Security Fees',
-                    data: '₱ $security',
+                    //data: '₱ $security',
+                    data: formatDigits(security),
                   ),
                   DetailRow(
                     title: 'Insurance',
-                    data: '₱ $insurance',
+                    //data: '₱ $insurance',
+                    data: formatDigits(insurance),
                   ),
                   DetailRow(
                     title: 'Legal Fees',
-                    data: '₱ $legal',
+                    //data: '₱ $legal',
+                    data: formatDigits(legal),
                   ),
                   DetailRow(
                     title: 'Administration Fees',
-                    data: '₱ $admin',
+                    //data: '₱ $admin',
+                    data: formatDigits(admin),
                   ),
                   DetailRow(
                     title: 'VAT (12%)',
-                    data: '₱ $vat',
+                    //data: '₱ $vat',
+                    data: formatDigits(vat),
                   ),
                   DetailRow(
                     title: 'Other Taxes',
-                    data: '₱ $others',
+                    //data: '₱ $others',
+                    data: formatDigits(others),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
@@ -233,7 +278,8 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                         ),
                         const Spacer(),
                         Text(
-                          '₱ ${payment.total}',
+                          // '₱ ${payment.total}',
+                          formatDigits(total),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 17,
@@ -278,13 +324,13 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(7),
                         ),
-                        child: const Image(
+                        child: Image(
                           fit: BoxFit.cover,
-                          image: AssetImage('lib/images/gcash.png'),
+                          image: AssetImage(paymentMethodImage()),
                         ),
                       ),
                       Text(
-                        'GCash',
+                        paymentMethod(),
                         style: TextStyle(
                           color: Colors.grey.shade800,
                           fontSize: 16,
@@ -293,7 +339,8 @@ class _PaymentDetailsState extends State<PaymentDetails> {
                       ),
                       const Spacer(),
                       Text(
-                        '₱ ${payment.total}0',
+                        //'₱ ${payment.total}0',
+                        formatDigits(total),
                         style: const TextStyle(
                           fontSize: 16,
                         ),

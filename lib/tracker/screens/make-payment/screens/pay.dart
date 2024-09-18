@@ -405,7 +405,9 @@ class _GCashPaymentState extends State<GCashPayment> {
                         child: SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            color: Color.fromARGB(255, 215, 163, 17),
+                          ),
                         ),
                       )
                     : const Center(child: Text('CONFIRM')),

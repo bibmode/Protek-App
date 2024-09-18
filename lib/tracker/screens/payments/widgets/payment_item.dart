@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:protek_tracker/models/payment.dart';
 
 class PaymentItem extends StatelessWidget {
@@ -13,21 +14,72 @@ class PaymentItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // format date submitted
-    DateTime date = DateTime.parse(payment.date!);
-    List<String> months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
+
+    String? method = payment.method;
+
+    String paymentMethodImage() {
+      if (method == 'gcash') {
+        return 'lib/images/gcash.png';
+      } else if (method == 'paymaya') {
+        return 'lib/images/maya.jpg';
+      } else if (method == 'grab_pay') {
+        return 'lib/images/grab.jpg';
+      } else {
+        return 'lib/images/Pay-online.png';
+      }
+    }
+
+    DateTime date = DateTime.parse(payment.date.toString());
+    // List<String> months = [
+    //   'Jan',
+    //   'Feb',
+    //   'Mar',
+    //   'Apr',
+    //   'May',
+    //   'Jun',
+    //   'Jul',
+    //   'Aug',
+    //   'Sep',
+    //   'Oct',
+    //   'Nov',
+    //   'Dec'
+    // ];
+
+    String formatDateTime(DateTime date) {
+      print("Inside date: $date");
+
+      // Convert UTC to local time
+      final localDate = date.toLocal();
+
+      // List of abbreviated month names
+      final List<String> abbreviatedMonths = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
+
+      // Format the date with custom logic
+      final String monthName = abbreviatedMonths[localDate.month - 1];
+      final DateFormat timeFormatter = DateFormat('h:mm a');
+
+      return 'Submitted on $monthName ${localDate.day}, ${localDate.year} at ${timeFormatter.format(localDate)}';
+    }
+
+    double total = double.parse(payment.total!);
+
+    String formatDigits() {
+      final NumberFormat formatter = NumberFormat('₱ #,##0.00');
+      return formatter.format(total);
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 21, 12, 0),
@@ -50,9 +102,9 @@ class PaymentItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(7),
                   ),
-                  child: const Image(
+                  child: Image(
                     fit: BoxFit.cover,
-                    image: AssetImage('lib/images/gcash.png'),
+                    image: AssetImage(paymentMethodImage()),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
@@ -64,7 +116,8 @@ class PaymentItem extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            '₱ ${payment.total}',
+                            //'₱ ${payment.total}',
+                            formatDigits(),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 17,
@@ -97,7 +150,8 @@ class PaymentItem extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        'Submitted on ${months[date.month - 1]} ${date.day}, ${date.year} at ${date.hour}:${date.minute}',
+                        //'Submitted on ${months[date.month - 1]} ${date.day}, ${date.year} at ${date.hour}:${date.minute}',
+                        formatDateTime(date),
                         style: const TextStyle(color: Colors.black54),
                       ),
                     ],
@@ -110,19 +164,26 @@ class PaymentItem extends StatelessWidget {
               margin: const EdgeInsets.only(top: 10),
               child: OutlinedButton(
                 onPressed: () {
-                  if (payment.validated == false && payment.error == false) {
-                    // Show Snackbar with a message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Payment is not yet done. Please complete it.'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  } else {
-                    // Navigate to the payment details page
-                    context.push('/tracker/payment-details', extra: payment);
-                  }
+                  // if (payment.validated == false && payment.error == false) {
+                  // Show Snackbar with a message
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(
+                  //     content: Center(
+                  //       child: Text(
+                  //         'Payment is not yet done. Please complete it.',
+                  //         style: TextStyle(color: Colors.black),
+                  //       ),
+                  //     ),
+                  //     backgroundColor: Color.fromARGB(
+                  //         255, 229, 194, 16), // Set background color here
+                  //     duration: Duration(seconds: 2),
+                  //   ),
+                  // );
+                  //   context.push('/tracker/payment-details', extra: payment);
+                  // } else {
+                  // Navigate to the payment details page
+                  context.push('/tracker/payment-details', extra: payment);
+                  // }
                 },
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(

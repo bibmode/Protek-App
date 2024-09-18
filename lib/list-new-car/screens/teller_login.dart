@@ -150,12 +150,15 @@ class _TellerLoginState extends State<TellerLogin> {
 
         // edited
         final spaceCode = context.read<NewVehicle>().space;
+        print("Sulod sa Spacecode: $spaceCode");
 
-        final branchData =
-            await supabase.from('spaces').update({'occupied': true})
-              ..match({'space_code': spaceCode});
-
-        print('vehicle submit $data');
+        try {
+          final branchData = await supabase.from('spaces').update(
+              {'occupied': true}).match({'space_code': spaceCode.toString()});
+          print('vehicle submit $branchData');
+        } catch (e) {
+          print("error in updating occupied: $e");
+        }
 
         return true;
       } catch (e) {
