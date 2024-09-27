@@ -50,6 +50,12 @@ class _PaymentDetailsState extends State<PaymentDetails> {
         return 'Pay Maya';
       } else if (method == 'grab_pay') {
         return 'Grab Pay';
+      } else if (method == 'atome') {
+        return 'Atome';
+      } else if (method == 'coins_ph') {
+        return 'coins.ph';
+      } else if (method == 'dob') {
+        return 'Direct Online Banking';
       } else {
         return 'Other Payment Method';
       }

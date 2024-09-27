@@ -35,25 +35,6 @@ class _FullScreenWebViewState extends State<FullScreenWebView> {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
-  // Change this for the table name and columns
-  // fetchPayments() async {
-  //   try {
-  //     dynamic response = await supabase
-  //         .from('payments')
-  //         .select()
-  //         .eq('junkshop_id', supabase.auth.currentUser!.id)
-  //         .select();
-
-  //     List<Payment> data =
-  //         response.map<Payment>((payment) => Payment.fromMap(payment)).toList();
-
-  //     setState(() {
-  //       payments = data;
-  //     });
-  //   } catch (e) {
-  //     print('error in fetching payments: $e');
-  //   }
-  // }
 
   @override
   void initState() {
@@ -66,7 +47,7 @@ class _FullScreenWebViewState extends State<FullScreenWebView> {
   // Method to start a periodic timer
   void _startPeriodicCheck() {
     _timer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
-      _retrievePayment(); // Check payment status every 30 seconds
+      _retrievePayment(); 
     });
   }
 
@@ -155,24 +136,6 @@ class _FullScreenWebViewState extends State<FullScreenWebView> {
     }
   }
 
-// Insert function
-  // Future<void> _updatePayment() async {
-  //   final dateNow = DateTime.now();
-  //   try {
-  //     dynamic response = await supabase
-  //         .from('payments')
-  //         .update({
-  //           'validated': true,
-  //           'paid_time': dateNow.toIso8601String(),
-  //           'payment_method': paymentMethod,
-  //         })
-  //         .eq('junkshop_id', supabase.auth.currentUser!.id)
-  //         .eq('schedule', widget.paymentSchedule);
-  //   } catch (e) {
-  //     print("Error in updating Payment Data: $e");
-  //   }
-  // }
-
   @override
   void dispose() {
     _timer?.cancel();
@@ -192,18 +155,18 @@ class _FullScreenWebViewState extends State<FullScreenWebView> {
           'Pay ${currentVehicle.make} balance',
           style: const TextStyle(color: Colors.white),
         ),
-        centerTitle: true, // Center the title
+        centerTitle: true, 
         backgroundColor: const Color.fromARGB(
-            255, 211, 189, 16), // Set AppBar color to green
+            255, 211, 189, 16),
 
-        automaticallyImplyLeading: false, // Removes the back arrow button
+        automaticallyImplyLeading: false, 
       ),
       body: Column(
         children: [
           Expanded(
             child: InAppWebView(
               initialUrlRequest: URLRequest(
-                url: WebUri(widget.url), // Use WebUri to create the URL request
+                url: WebUri(widget.url),
               ),
               initialSettings: InAppWebViewSettings(
                 javaScriptEnabled: true,
@@ -236,20 +199,15 @@ class _FullScreenWebViewState extends State<FullScreenWebView> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color.fromARGB(255, 207, 198, 24), // Button color
-                  minimumSize:
-                      const Size(300, 50), // Set a larger size for the button
-                  padding: const EdgeInsets.symmetric(
-                      vertical:
-                          16.0), // Increase vertical padding inside the button
-                  textStyle:
-                      const TextStyle(fontSize: 18), // Increase text size
+                  backgroundColor: const Color.fromARGB(255, 207, 198, 24),
+                  minimumSize: const Size(300, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: const TextStyle(fontSize: 18),
                 ),
                 child: const Text('Done Paying'),
               ),
             ),
-          const SizedBox(height: 35), // Add space between button and bottom
+          const SizedBox(height: 35),
         ],
       ),
     );

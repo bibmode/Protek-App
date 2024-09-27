@@ -98,6 +98,11 @@ flutter:
     - lib/images/gcash-send.jpg
     - lib/images/protek_video.mp4
     - lib/images/Pay-online.png
+    - lib/images/cards.png
+    - lib/images/atome.png
+    - lib/images/DOB.png
+    - lib/images/coinsPH.png
+    - lib/images/OTC.png
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

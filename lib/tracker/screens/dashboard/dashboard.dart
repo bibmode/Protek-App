@@ -238,19 +238,19 @@ class _DashboardState extends State<Dashboard> {
     DateTime now = DateTime.now();
     DateTime checkInDate = DateTime.parse(currentVehicle.dateOfCheckIn!);
     DateTime? checkOut = currentVehicle.dateOfCheckOut != null
-        ? null
-        : DateTime.parse(currentVehicle.dateOfCheckOut!);
-    // TODO: add logic for vehicles that have already been checked-out
+        ? DateTime.parse(currentVehicle.dateOfCheckOut!)
+        : null;
 
     if (checkOut == null) {
-      numberOfDays = daysBetween(checkInDate, now);
+      numberOfDays = daysBetween(checkInDate, now) + 1;
     } else {
-      numberOfDays = daysBetween(checkInDate, checkOut);
+      numberOfDays = daysBetween(checkInDate, checkOut) + 1;
     }
 
     double? paid = context.read<VehicleTracked>().currentVehicle.paid ?? 0;
     double? dailyRate = context.read<VehicleTracked>().currentVehicle.dailyRate;
     double rent = (dailyRate! * numberOfDays);
+    print('num checkout: $numberOfDays');
     double security = (rent * 0.06).round() * 1.0;
     double insurance = (rent * 0.08).round() * 1.0;
     double legal = (rent * 0.03).round() * 1.0;

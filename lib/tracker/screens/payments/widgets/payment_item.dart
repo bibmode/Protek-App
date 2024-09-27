@@ -24,6 +24,16 @@ class PaymentItem extends StatelessWidget {
         return 'lib/images/maya.jpg';
       } else if (method == 'grab_pay') {
         return 'lib/images/grab.jpg';
+      } else if (method == 'card') {
+        return 'lib/images/cards.png';
+      } else if (method == 'atome') {
+        return 'lib/images/atome.png';
+      } else if (method == 'dob') {
+        return 'lib/images/DOB.png';
+      } else if (method == 'coins_ph') {
+        return 'lib/images/coinsPH.png';
+      } else if (method == 'otc') {
+        return 'lib/images/OTC.png';
       } else {
         return 'lib/images/Pay-online.png';
       }
